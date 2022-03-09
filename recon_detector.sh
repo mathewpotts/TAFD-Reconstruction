@@ -1,13 +1,14 @@
 #!/bin/bash
-# Designed to work in tandum with Tareq's/Matt's process scripts this just allows the functionality to choose a date range to process files
+# Designed to work in tandum with Tareq's process scripts this just allows the functionality to choose a date range to process files
 # Matt Potts 2020/07/24
 
 #function on how to use script 
 print_usage() {
     printf "
-Purpose: Process all pass0 files all the way to pass 5.
+Purpose: Process all pass0 files all the way to pass 5 for TALE, MDTAx4, and BRTAx4.
 
-Usage: $0 -s <yyyymmdd> -e <yyyymmdd> -p <1-4> -q <1-4>
+Usage: $0 -d <detector> -s <yyyymmdd> -e <yyyymmdd> -p <0-4> -q <0-4>
+    [-d : tale, mdtax4, brtax4 ]
     [-s : Start date <yyyymmdd>]
     [-e : End date range <yyyymmdd>. (Defaults to Current Date)]
     [-p : What Pass to start at <1-4>. (Defaults to 1)]
@@ -29,8 +30,9 @@ fi
 
 #function to process all data in raw dir
 all_files() {
-    for dir in work/pass0/data/*; do
-	detector_run_recon.sh mdtax4 "${dir:16:8}" "$end_pass" "$st_pass"
+    f="/home/tamember/data/$det/pass0/data/*"
+    for dir in $f; do
+	detector_run_recon.sh "$det" "${dir:16:8}" "$end_pass" "$st_pass"
     done
     exit 0
 }
@@ -42,8 +44,9 @@ st_pass=1
 end_pass=4
 
 #grab user input
-while getopts ":s:e:p:q:ha" flag; do
+while getopts ":d:s:e:p:q:ha" flag; do
     case $flag in
+        d) det="${OPTARG}" ;;
 	s) st="${OPTARG}" ;;
 	e) end="${OPTARG}" ;;
 	p) st_pass="${OPTARG}" ;;
@@ -56,8 +59,8 @@ done
 
 #process selected range
 for dir in $(seq $st $end); do
-    f="/home/tamember/matt/tax4md/work/pass0/data/${dir}*"
+    f="/home/tamember/data/$det/pass0/data/${dir}*"
     if [ -e $f ]; then
-	detector_run_recon.sh mdtax4 "$dir" "$end_pass" "$st_pass"
+	detector_run_recon.sh "$det" "$dir" "$end_pass" "$st_pass"
     fi
 done
